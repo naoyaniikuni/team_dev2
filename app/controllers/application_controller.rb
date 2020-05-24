@@ -16,4 +16,8 @@ class ApplicationController < ActionController::Base
   def init_team
     current_user.assigns.create!(team_id: Team.first.id) if current_user.teams.blank?
   end
+
+  def set_current_user
+    @current_user = User.find_by(id: session[:user_id])
+  end
 end

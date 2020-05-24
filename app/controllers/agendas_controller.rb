@@ -1,5 +1,5 @@
 class AgendasController < ApplicationController
-  # before_action :set_agenda, only: %i[show edit update destroy]
+  before_action :set_agenda, only: %i[show edit update destroy]
 
   def index
     @agendas = Agenda.all
@@ -20,6 +20,20 @@ class AgendasController < ApplicationController
       render :new
     end
   end
+
+  def destroy
+    @team = Team.find_by(id: @agenda.team_id)
+    if (@agenda.user_id == current_user.id) || (@team.owner_id == current_user.id)
+      @agenda.destroy
+      @team.assign_users.each do |user|
+          AgendaDestroyMailer.agenda_destroy_mail(user.email).deliver
+        end
+        redirect_to   dashboard_path, notice: "アジェンダを削除しました。"
+    else
+      redirect_to   team_agendas_path(@agenda.team_id), notice: "権限がありません"
+    end
+  end
+  
 
   private
 
